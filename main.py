@@ -54,37 +54,33 @@ class DataOperations:
         return notes
 
     def filter_notes(self, notes, start_row=None, end_row=None, tags=None):
-        # Filter out notes where the front or back is 'xxx' or ''
-        filtered_notes = [
-            note for note in notes
-            if 'front' in note and 'back' in note and note['front'] not in ['xxx', ''] and note['back'] not in ['xxx', '']
-        ]
+        filtered_notes = [note for note in notes if note['anki_note_dict'].get('front') not in ('xxx', '') and note['anki_note_dict'].get('back') not in ('xxx', '')]
 
-        notes_with_back = [
-            note for note in notes
+        filtered_notes = [
+            note for note in filtered_notes
             if 'back' in note['anki_note_dict']
         ]
 
         if start_row is not None:
-            notes_in_row_interval = [
-                note for note in notes_with_back
+            filtered_notes = [
+                note for note in filtered_notes
                 if note['row_number'] >= start_row
             ]
         elif end_row is not None:
-            notes_in_row_interval = [
-                note for note in notes_with_back
+            filtered_notes = [
+                note for note in filtered_notes
                 if note['row_number'] <= end_row
             ]
         else:
-            notes_in_row_interval = notes_with_back
+            filtered_notes = filtered_notes
 
         if tags:
             filtered_notes = [
-                note for note in notes_in_row_interval
+                note for note in filtered_notes
                 if any(tag in note['anki_note_dict']['tags'] for tag in tags)
             ]
         else:
-            filtered_notes = notes_in_row_interval
+            filtered_notes = filtered_notes
 
         return filtered_notes
 
@@ -245,7 +241,6 @@ def main():
             filter_end_row=args.filter_end_row,
             filter_tags=args.filter_tags
         )
-        logging.info(data_ops.filtered_notes_without_now_number)
     # Determine the value of notes based on the condition
     if args.extract_and_ingest_notes:
         notes = data_ops.filtered_notes_without_now_number
